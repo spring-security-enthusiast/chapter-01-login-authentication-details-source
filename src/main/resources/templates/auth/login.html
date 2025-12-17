@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<head>
+    <meta charset="UTF-8"/>
+    <title th:text="'Log in • ' + (${tenantId} ?: 'Unknown tenant')">Log in</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1"/>
+
+    <style>
+        /* prevent input overflow */
+        *, *::before, *::after { box-sizing: border-box; }
+
+        /* theme variables (defaults) */
+        :root{
+            --bg: #f6f7fb;
+            --brand: #111827;
+            --brand2: #1f2937;
+            --accent: #111827;
+            --accentText: #ffffff;
+        }
+
+        /* tenant themes */
+        body[data-tenant="acme"]{
+            --bg: #f0f9ff;
+            --brand: #0f766e;
+            --brand2: #115e59;
+            --accent: #0f766e;
+        }
+        body[data-tenant="globex"]{
+            --bg: #fff7ed;
+            --brand: #7c2d12;
+            --brand2: #9a3412;
+            --accent: #7c2d12;
+        }
+
+        body { font-family: system-ui; background: var(--bg); margin:0; }
+
+        /* subtle background texture */
+        body::before{
+            content:"";
+            position: fixed;
+            inset: 0;
+            pointer-events: none;
+            opacity: .12;
+            background:
+                    radial-gradient(circle at 20% 10%, rgba(0,0,0,.12), transparent 45%),
+                    radial-gradient(circle at 80% 30%, rgba(0,0,0,.10), transparent 50%),
+                    radial-gradient(circle at 30% 90%, rgba(0,0,0,.08), transparent 45%);
+        }
+
+        .wrap {
+            max-width: 980px;
+            margin: 0 auto;
+            padding: 48px 16px;
+            display:flex;
+            gap: 24px;
+            align-items: stretch;
+            position: relative;
+        }
+
+        /* optional “alignment vibe”: acme left, globex right */
+        body[data-tenant="acme"] .wrap { justify-content: flex-start; }
+        body[data-tenant="globex"] .wrap { justify-content: flex-end; }
+
+        .brand {
+            width: 360px;
+            padding: 28px;
+            border-radius: 18px;
+            background: linear-gradient(135deg, var(--brand), var(--brand2));
+            color:#fff;
+            box-shadow: 0 10px 24px rgba(0,0,0,.08);
+            border: 1px solid rgba(255,255,255,.08);
+        }
+
+        .card {
+            flex:1;
+            padding: 28px;
+            background:#fff;
+            border:1px solid #e5e7eb;
+            border-radius: 18px;
+            box-shadow: 0 10px 24px rgba(0,0,0,.06);
+            position: relative;
+        }
+
+        .tag {
+            display:inline-flex;
+            align-items:center;
+            gap: 8px;
+            padding: 6px 10px;
+            border-radius: 999px;
+            border: 1px solid rgba(255,255,255,.22);
+            background: rgba(255,255,255,.10);
+            font-size: 12px;
+        }
+
+        .logo{
+            width: 44px;
+            height: 44px;
+            border-radius: 14px;
+            margin-bottom: 12px;
+            border: 1px solid rgba(255,255,255,.22);
+            background: rgba(255,255,255,.16);
+            display:flex;
+            align-items:center;
+            justify-content:center;
+            font-weight: 700;
+            letter-spacing: .5px;
+        }
+        .logo::after{
+            content: "S";
+            opacity: .95;
+        }
+        body[data-tenant="acme"] .logo::after{ content:"A"; }
+        body[data-tenant="globex"] .logo::after{ content:"G"; }
+
+        h1 { margin: 10px 0 6px; font-size: 24px; }
+        .muted { color:#6b7280; font-size: 13px; }
+        .brand .muted { color: rgba(255,255,255,.78); }
+
+        label { display:block; margin-top: 12px; font-size: 14px; }
+        input, button { width:100%; max-width:100%; padding: 12px; border-radius: 12px; font-size: 14px; }
+        input { border:1px solid #d1d5db; margin-top: 6px; background:#fff; min-width:0; }
+        input:focus{
+            outline: none;
+            border-color: rgba(0,0,0,.25);
+            box-shadow: 0 0 0 4px rgba(0,0,0,.06);
+        }
+
+        button {
+            margin-top: 16px;
+            border:1px solid var(--accent);
+            background: var(--accent);
+            color: var(--accentText);
+            font-weight: 600;
+        }
+        button:hover { cursor:pointer; opacity:.93; }
+        button:disabled { opacity: .55; cursor: not-allowed; }
+
+        .msg { margin-top: 10px; }
+        .warn {
+            background:#fff7ed;
+            border:1px solid #fed7aa;
+            padding: 10px;
+            border-radius: 12px;
+            font-size: 13px;
+            color:#9a3412;
+            margin-bottom: 12px;
+        }
+
+        .tiny {
+            font-size: 12px;
+            color: rgba(255,255,255,.72);
+            margin-top: 14px;
+            line-height: 1.5;
+        }
+
+        .backlink a { color:#111827; text-decoration: none; }
+        .backlink a:hover { text-decoration: underline; }
+
+        code { background: rgba(255,255,255,.16); padding: 2px 6px; border-radius: 8px; }
+
+        @media (max-width: 900px){
+            .wrap { flex-direction: column; }
+            .brand { width: 100%; }
+        }
+    </style>
+</head>
+
+<body th:attr="data-tenant=${tenantId}">
+<div class="wrap">
+
+    <div class="brand">
+        <div class="logo" aria-hidden="true"></div>
+
+        <div class="tag">
+            Tenant Login
+            <span style="opacity:.7;">•</span>
+            <span th:text="${tenantId} ?: 'UNKNOWN'">acme</span>
+        </div>
+
+        <h1 th:text="'Log in to ' + (${tenantId} ?: 'UNKNOWN')">Log in to acme</h1>
+
+        <p class="muted" th:if="${tenantId == 'acme'}">
+            Welcome back to <b>Acme Store Admin</b>.
+        </p>
+        <p class="muted" th:if="${tenantId == 'globex'}">
+            Sign in to your <b>Globex Workspace</b>.
+        </p>
+        <p class="muted" th:if="${tenantId != 'acme' and tenantId != 'globex'}">
+            This demo resolves tenant from the subdomain.
+        </p>
+
+        <div class="tiny">
+            We capture at login time:
+            <br/>• tenantId (from subdomain)
+            <br/>• user-agent → deviceType
+            <br/>• login attempt time
+            <br/><br/>
+            Like: <code>your-store.myshopify.com</code>
+        </div>
+    </div>
+
+    <div class="card">
+        <div th:if="${tenantId == null}" class="warn">
+            No tenant detected. Please go back to the index page and choose a tenant.
+            (Example: <b>acme.localhost</b>)
+        </div>
+
+        <form method="post" action="/auth/login_processing">
+            <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+
+            <label>Username</label>
+            <input name="username" autocomplete="username" required />
+
+            <label>Password</label>
+            <input name="password" type="password" autocomplete="current-password" required />
+
+            <button type="submit" th:disabled="${tenantId == null}">Sign in</button>
+        </form>
+
+        <div class="msg" th:if="${param.error}">
+            <p style="color:#b91c1c; margin: 12px 0 0;">Login failed. Check tenant/user/password.</p>
+        </div>
+
+        <div class="msg" th:if="${param.logout}">
+            <p style="color:#065f46; margin: 12px 0 0;">Logged out.</p>
+        </div>
+
+        <p class="muted backlink" style="margin-top:14px;">
+            <a th:href="${indexUrl}">← Back to index</a>
+        </p>
+
+        <!-- Optional debug (remove later) -->
+        <!--
+        <p class="muted" style="margin-top:10px;">
+          serverName: <span th:text="${#httpServletRequest.serverName}">-</span><br/>
+          host: <span th:text="${#httpServletRequest.getHeader('Host')}">-</span>
+        </p>
+        -->
+    </div>
+
+</div>
+</body>
+</html>
