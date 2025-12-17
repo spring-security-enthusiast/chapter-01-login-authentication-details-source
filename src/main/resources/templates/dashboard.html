@@ -1,0 +1,316 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<head>
+    <meta charset="UTF-8"/>
+    <title th:text="'Dashboard • ' + (${tenantId} ?: 'Unknown tenant')">Dashboard</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1"/>
+
+    <style>
+        *, *::before, *::after { box-sizing: border-box; }
+
+        :root{
+            --bg: #f6f7fb;
+            --brand: #111827;
+            --brand2: #1f2937;
+            --accent: #111827;
+            --accentText: #ffffff;
+            --card: #ffffff;
+            --border: #e5e7eb;
+            --muted: #6b7280;
+        }
+
+        body[data-tenant="acme"]{
+            --bg: #f0f9ff;
+            --brand: #0f766e;
+            --brand2: #115e59;
+            --accent: #0f766e;
+        }
+        body[data-tenant="globex"]{
+            --bg: #fff7ed;
+            --brand: #7c2d12;
+            --brand2: #9a3412;
+            --accent: #7c2d12;
+        }
+
+        body { font-family: system-ui; background: var(--bg); margin:0; }
+
+        body::before{
+            content:"";
+            position: fixed;
+            inset: 0;
+            pointer-events: none;
+            opacity: .12;
+            background:
+                    radial-gradient(circle at 20% 10%, rgba(0,0,0,.12), transparent 45%),
+                    radial-gradient(circle at 80% 30%, rgba(0,0,0,.10), transparent 50%),
+                    radial-gradient(circle at 30% 90%, rgba(0,0,0,.08), transparent 45%);
+        }
+
+        .wrap{
+            max-width: 1100px;
+            margin: 0 auto;
+            padding: 28px 16px 48px;
+            position: relative;
+        }
+
+        .topbar{
+            display:flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 16px;
+        }
+
+        .title{
+            display:flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        h1 { margin:0; font-size: 22px; }
+        .muted { color: var(--muted); font-size: 13px; margin:0; }
+
+        .pill{
+            display:inline-flex;
+            align-items:center;
+            gap: 8px;
+            padding: 6px 10px;
+            border-radius: 999px;
+            border: 1px solid rgba(0,0,0,.12);
+            background: rgba(255,255,255,.7);
+            font-size: 12px;
+        }
+
+        .btn{
+            display:inline-flex;
+            align-items:center;
+            justify-content:center;
+            padding: 10px 12px;
+            border-radius: 12px;
+            border: 1px solid var(--accent);
+            background: var(--accent);
+            color: var(--accentText);
+            font-weight: 600;
+            text-decoration: none;
+        }
+        .btn:hover{ opacity:.93; cursor:pointer; }
+
+        .grid{
+            display:grid;
+            grid-template-columns: 360px 1fr;
+            gap: 18px;
+            align-items: start;
+        }
+
+        .card{
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 18px;
+            box-shadow: 0 10px 24px rgba(0,0,0,.06);
+            overflow: hidden;
+        }
+
+        .cardHeader{
+            padding: 16px 18px;
+            background: linear-gradient(135deg, var(--brand), var(--brand2));
+            color: #fff;
+        }
+
+        .cardHeader h2{ margin:0; font-size: 16px; }
+        .cardHeader .muted{ color: rgba(255,255,255,.80); }
+
+        .cardBody{ padding: 16px 18px; }
+
+        .kv{
+            display:grid;
+            grid-template-columns: 140px 1fr;
+            gap: 10px 14px;
+            font-size: 14px;
+            align-items: center;
+        }
+        .k{ color: var(--muted); }
+        code{
+            background:#f3f4f6;
+            padding: 2px 6px;
+            border-radius: 8px;
+            font-size: 12px;
+        }
+
+        .note{
+            margin-top: 12px;
+            padding: 10px 12px;
+            border-radius: 14px;
+            border: 1px solid rgba(0,0,0,.08);
+            background: rgba(255,255,255,.75);
+            font-size: 13px;
+            color: #111827;
+            line-height: 1.5;
+        }
+
+        details{ margin-top: 12px; }
+        summary{ cursor:pointer; color: var(--muted); font-size: 13px; }
+        pre{
+            margin: 10px 0 0;
+            padding: 12px;
+            border-radius: 14px;
+            border: 1px solid rgba(0,0,0,.08);
+            background: #fff;
+            white-space: pre-wrap;
+            word-break: break-word;
+            font-size: 12px;
+            line-height: 1.5;
+        }
+
+        .rightTop{
+            display:flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .bigCardHeader{
+            padding: 18px;
+            border-bottom: 1px solid var(--border);
+            display:flex;
+            justify-content: space-between;
+            align-items: start;
+            gap: 12px;
+        }
+
+        .bigTitle{
+            display:flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .bigTitle h2{ margin:0; font-size: 16px; }
+        .bigTitle p{ margin:0; color: var(--muted); font-size: 13px; }
+
+        .tag{
+            padding: 6px 10px;
+            border-radius: 999px;
+            border: 1px solid rgba(0,0,0,.12);
+            background: rgba(255,255,255,.8);
+            font-size: 12px;
+        }
+
+        .bigBody{ padding: 16px 18px; }
+
+        .twoCol{
+            display:grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+        }
+
+        .mini{
+            border: 1px solid rgba(0,0,0,.08);
+            background: rgba(255,255,255,.85);
+            border-radius: 16px;
+            padding: 12px;
+        }
+
+        .mini .label{ color: var(--muted); font-size: 12px; }
+        .mini .value{ margin-top: 6px; font-size: 14px; }
+
+        @media (max-width: 920px){
+            .grid{ grid-template-columns: 1fr; }
+            .twoCol{ grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+
+<body th:attr="data-tenant=${tenantId}">
+<div class="wrap">
+
+    <div class="topbar">
+        <div class="title">
+            <h1>Dashboard</h1>
+            <p class="muted">
+                Signed in as <b th:text="${username}">user</b>
+                <span class="pill" style="margin-left:10px;">
+          Tenant:
+          <b th:text="${tenantId} ?: 'UNKNOWN'">acme</b>
+        </span>
+            </p>
+        </div>
+
+        <form id="logoutForm"
+              th:action="@{/logout}"
+              method="post"
+              style="display: inline;">
+            <input type="hidden"
+                   th:name="${_csrf.parameterName}"
+                   th:value="${_csrf.token}" />
+            <button class="btn" type="submit">Logout</button>
+        </form>
+    </div>
+
+    <div class="grid">
+
+        <!-- LEFT: “What was captured” -->
+        <div class="card">
+            <div class="cardHeader">
+                <h2>Captured at login time</h2>
+                <p class="muted">This is Authentication.getDetails()</p>
+            </div>
+
+            <div class="cardBody">
+                <div class="kv">
+                    <div class="k">tenantId</div>
+                    <div><code th:text="${tenantId}">acme</code></div>
+
+                    <div class="k">deviceType</div>
+                    <div th:text="${deviceType}">DESKTOP</div>
+
+                    <div class="k">loginAttemptTime</div>
+                    <div th:text="${loginAttemptTime}">2025-12-17T14:28</div>
+                </div>
+
+                <div class="note">
+                    These values are captured <b>once</b> during login by
+                    <b>AuthenticationDetailsSource</b> and preserved in the session until logout/expiry.
+                </div>
+
+                <details>
+                    <summary>Show User-Agent</summary>
+                    <pre th:text="${userAgent}">Mozilla/5.0 ...</pre>
+                </details>
+            </div>
+        </div>
+
+        <!-- RIGHT: “What WebAuthenticationDetails already gives you” + quick summary -->
+        <div class="card">
+            <div class="bigCardHeader">
+                <div class="bigTitle">
+                    <h2>Default request details (from WebAuthenticationDetails)</h2>
+                    <p>These come for free when you extend <code>WebAuthenticationDetails</code>.</p>
+                </div>
+                <div class="tag">SecurityContext ✅</div>
+            </div>
+
+            <div class="bigBody">
+                <div class="twoCol">
+                    <div class="mini">
+                        <div class="label">IP address</div>
+                        <div class="value" th:text="${ipAddress}">127.0.0.1</div>
+                    </div>
+                    <div class="mini">
+                        <div class="label">Session ID</div>
+                        <div class="value"><code th:text="${sessionId}">SESSION</code></div>
+                    </div>
+                </div>
+
+                <div style="margin-top:12px;" class="mini">
+                    <div class="label">Why this matters</div>
+                    <div class="value" style="color: var(--muted); font-size: 13px; line-height:1.5;">
+                        You can now validate tenant/device rules in an <b>AuthenticationProvider</b>,
+                        and audit login events in a <b>SuccessHandler</b> — using the same details object.
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+</div>
+</body>
+</html>
