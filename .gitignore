@@ -29,5 +29,12 @@ build/
 !**/src/main/**/build/
 !**/src/test/**/build/
 
+### docker
+Dockerfile
+
 ### VS Code ###
 .vscode/
+k3s/**
+
+# macOS
+.DS_Store
